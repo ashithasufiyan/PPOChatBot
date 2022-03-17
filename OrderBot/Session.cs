@@ -6,7 +6,7 @@ namespace OrderBot
     {
         private enum State
         {
-            WELCOMING, SIZE, PROTEIN
+            WELCOMING, MACHINETYPE, SIZE, FOODPRODUCTS, QUALITYCRITERIA, CONTACTSERVICEAGENT
         }
 
         private State nCur = State.WELCOMING;
@@ -19,24 +19,37 @@ namespace OrderBot
 
         public String OnMessage(String sInMessage)
         {
-            String sMessage = "Welcome to Rich's Shawarama! What size would you like?";
+            String sMessage = "Welcome to P&P Optica! What's your choice for the imaging machine?\n1. P&P Imaging AV-1290(Vegetables only)\n2. P&P Imaging AX-1583(Meat only)\n3. P&P Imaging BX-1649(Both)\n Please respond with a number based on your choice.";
             switch (this.nCur)
             {
                 case State.WELCOMING:
-                    this.nCur = State.SIZE;
+                    this.nCur=State.MACHINETYPE;
+                    break;
+                case State.MACHINETYPE:
+                   int machinetypeNo=Convert.ToInt32(sInMessage);
+                    if(machinetypeNo==1)
+                    this.oOrder.MachineType="P&P Imaging AV-1290";
+                    else if(machinetypeNo==2)
+                    this.oOrder.MachineType="P&P Imaging AX-1583";
+                    else if(machinetypeNo==3)
+                    this.oOrder.MachineType="P&P Imaging BX-1649";
+                    else
+                    {
+                    sMessage="Wrong input! Please input numbers from the below options:\n1. P&P Imaging AV-1290(Vegetables only)\n2. P&P Imaging AX-1583(Meat only)\n3. P&P Imaging BX-1649(For both)";
+                    this.nCur=State.MACHINETYPE;
+                    break;
+                    }
+                    sMessage = "What food products would you like to scan using " + this.oOrder.MachineType + " imaging machine?";
+                    this.nCur=State.FOODPRODUCTS;
+                    break;
+                case State.FOODPRODUCTS:
+                    sMessage = "What is the quality criteria" + this.oOrder.MachineType+ " imaging machine ?";
                     break;
                 case State.SIZE:
-                    this.oOrder.Size = sInMessage;
-                    this.oOrder.Save();
-                    sMessage = "What protein would you like on this  " + this.oOrder.Size + " Shawarama?";
-                    this.nCur = State.PROTEIN;
+                    sMessage = "What is the required scan count per hour for the" + this.oOrder.MachineType+ " imaging machine ?";
+                    this.nCur=State.FOODPRODUCTS;
                     break;
-                case State.PROTEIN:
-                    string sProtein = sInMessage;
-                    sMessage = "What toppings would you like on this  " + this.oOrder.Size + " " + sProtein + " Shawarama?";
-                    break;
-                    
-
+                
             }
             System.Diagnostics.Debug.WriteLine(sMessage);
             return sMessage;

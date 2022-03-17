@@ -4,6 +4,7 @@ namespace OrderBot
 {
     public class Order
     {
+        private string _machinetype;
         private string _size;
         private string _phone;
 
@@ -15,6 +16,11 @@ namespace OrderBot
         public string Size{
             get => _size;
             set => _size = value;
+        }
+
+        public string MachineType{
+            get => _machinetype;
+            set => _machinetype = value;
         }
 
         public void Save(){
