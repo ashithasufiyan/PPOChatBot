@@ -8,23 +8,31 @@ namespace OrderBot.tests
     public class OverUnderTest
     {
         [Fact]
-        public void Test1()
-        {
-
-        }
-        [Fact]
         public void TestWelcome()
         {
             Session oSession = new Session("12345");
             String sInput = oSession.OnMessage("hello");
             Assert.True(sInput.Contains("Welcome"));
+            Assert.True(sInput.Contains("P&P Imaging A"));
         }
         [Fact]
-        public void TestShawarama()
+        public void TestMachineTypeTrue()
         {
             Session oSession = new Session("12345");
-            String sInput = oSession.OnMessage("hello");
-            Assert.True(sInput.ToLower().Contains("imaging"));
+            oSession.OnMessage("hello");
+            String sInput=oSession.OnMessage("2");
+            Assert.True(sInput.ToLower().Contains("food products"));
+            Assert.True(sInput.ToLower().Contains("1583"));
+        }
+        [Fact]
+        public void TestMachineTypeFalse()
+        {
+            Session oSession = new Session("12345");
+            oSession.OnMessage("hello");
+            String sInput=oSession.OnMessage("5");
+            Assert.True(sInput.ToLower().Contains("wrong input"));
+            sInput=oSession.OnMessage("abcd");
+            Assert.True(sInput.ToLower().Contains("wrong input"));
         }
         [Fact]
         public void TestSize()
@@ -33,16 +41,7 @@ namespace OrderBot.tests
             String sInput = oSession.OnMessage("hello");
             Assert.True(sInput.ToLower().Contains("choice"));
         }
-        [Fact]
-        public void TestLarge()
-        {
-            Session oSession = new Session("12345");
-            oSession.OnMessage("hello");
-            String sInput = oSession.OnMessage("large");
-            Assert.True(sInput.ToLower().Contains("protein"));
-            Assert.True(sInput.ToLower().Contains("large"));
-        }
-        [Fact]
+              
         public void TestChicken()
         {
             string sPath = DB.GetConnectionString();
