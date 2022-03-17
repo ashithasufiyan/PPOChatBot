@@ -24,14 +24,14 @@ namespace OrderBot.tests
         {
             Session oSession = new Session("12345");
             String sInput = oSession.OnMessage("hello");
-            Assert.True(sInput.ToLower().Contains("shawarama"));
+            Assert.True(sInput.ToLower().Contains("imaging"));
         }
         [Fact]
         public void TestSize()
         {
             Session oSession = new Session("12345");
             String sInput = oSession.OnMessage("hello");
-            Assert.True(sInput.ToLower().Contains("size"));
+            Assert.True(sInput.ToLower().Contains("choice"));
         }
         [Fact]
         public void TestLarge()
