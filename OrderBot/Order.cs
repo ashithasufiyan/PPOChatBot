@@ -1,10 +1,14 @@
 using Microsoft.Data.Sqlite;
+using System.Collections.Generic;
 
 namespace OrderBot
 {
     public class Order
     {
         private string _machinetype;
+
+        public List<string> _foodProducts=new List<string>();
+        public List<string> _qualityCriteria=new List<string>();
         private string _size;
         private string _phone;
 
