@@ -15,8 +15,9 @@ namespace OrderBot
         private Order oOrder;
 
         public Session(string sPhone){
+            Random random=new Random();
             this.oOrder = new Order();
-            this.oOrder.AppointmentID = sPhone;
+            this.oOrder.AppointmentID = random.Next().ToString();
         }
 
         public String OnMessage(String sInMessage)
