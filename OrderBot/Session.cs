@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace OrderBot
 {
@@ -7,7 +8,7 @@ namespace OrderBot
     {
         private enum State
         {
-            WELCOMING, MACHINETYPE, SIZE, FOODPRODUCTS, QUALITYCRITERIA, CONTACTSERVICEAGENT
+            WELCOMING, MACHINETYPE, FOODPRODUCTS, QUALITYCRITERIA, CONTACTSERVICEAGENT, BOOKED
         }
 
         private State nCur = State.WELCOMING;
@@ -15,13 +16,18 @@ namespace OrderBot
 
         public Session(string sPhone){
             this.oOrder = new Order();
-            this.oOrder.Phone = sPhone;
+            this.oOrder.AppointmentID = sPhone;
         }
 
         public String OnMessage(String sInMessage)
         {
-            //String sMessage = "Welcome to P&P Optica!\nWhat's your choice for the imaging machine?\n1. P&P Imaging AV-1290(Vegetables only)\n2. P&P Imaging AX-1583(Meat only)\n3. P&P Imaging BX-1649(Both)\n Please respond with a number based on your choice.";
-            String sMessage = "Welcome to P&P Optica!\nWhat's your choice for the imaging machine?\n1. P&P Imaging AV-1290(Vegetables only)\n2. P&P Imaging AX-1583(Meat only)\n Please respond with a number based on your choice.";
+            //Welcome message
+            String sMessage = "Welcome to P&P Optica!\nWhat's your choice for the imaging machine?\n1. P&P Imaging AV-1290(Vegetables only)\n2. P&P Imaging AM-1583(Meat only)\n Please respond with a number based on your choice.";
+            
+            //Dates
+            String FirstDate=DateTime.Now.AddDays(1).AddHours(12).ToString("dddd, dd MMMM yyyy hh:mm tt");
+            String SecondDate=DateTime.Now.AddDays(1).AddHours(15).ToString("dddd, dd MMMM yyyy hh:mm tt");
+            String ThirdDate=DateTime.Now.AddDays(2).AddHours(15).ToString("dddd, dd MMMM yyyy hh:mm tt");
             switch (this.nCur)
             {
                 case State.WELCOMING:
@@ -34,11 +40,8 @@ namespace OrderBot
                     this.oOrder.MachineType="P&P Imaging AV-1290";
                     else if(machinetypeNo==2)
                     this.oOrder.MachineType="P&P Imaging AM-1583";
-                    else if(machinetypeNo==3)
-                    this.oOrder.MachineType="P&P Imaging BX-1649";
                     else
                     {
-                    //sMessage="Wrong input! Please input numbers from the below options:\n1. P&P Imaging AV-1290(Vegetables only)\n2. P&P Imaging AM-1583(Meat only)\n3. P&P Imaging BX-1649(For both)";
                     sMessage="Wrong input! Please input numbers from the below options:\n1. P&P Imaging AV-1290(Vegetables only)\n2. P&P Imaging AM-1583(Meat only)";
                     this.nCur=State.MACHINETYPE;
                     break;
@@ -57,7 +60,12 @@ namespace OrderBot
                                 break;
                             }
                             else{
-                            sMessage = "What is the quality criteria" + this.oOrder.MachineType+ " imaging machine?";
+                                 StringBuilder sb = new StringBuilder();
+                                foreach (String s in oOrder._foodProducts)
+                                {
+                                    sb.Append(" "+s);
+                                }
+                            sMessage = "What is the quality criteria for the selected food products\n"+sb+"\n in the "+this.oOrder.MachineType+ " imaging machine?";
                             this.nCur=State.QUALITYCRITERIA;
                             break;
                             }
@@ -98,6 +106,7 @@ namespace OrderBot
                 case State.QUALITYCRITERIA:
                     List<string> vegetableQC=new List<string>(){"soil", "mud", "sand", "plastic", "fungus", "pesticide", "age"};
                     List<string> meatQC=new List<string>(){"fungus", "plastic", "bone", "fat", "blood clot", "hair", "age"};
+                    
                     if(sInMessage.ToLower()=="y"||sInMessage.ToLower()=="yes")
                     {
                             if(oOrder._qualityCriteria.Count==0){
@@ -105,8 +114,11 @@ namespace OrderBot
                                 break;
                             }
                             else{
-                            sMessage = "What is the required scan count per hour for the " + this.oOrder.MachineType+ " imaging machine ?";
-                            this.nCur=State.SIZE;
+                            //sMessage = "What is the required scan count per hour for the " + this.oOrder.MachineType+ " imaging machine ?";
+                            sMessage = "You are almost close to finishing your order.\n"
+                            +"Please select from the below slot for meeting with our Customer service agent \nto select size and complete the order:\n"+
+                            "1. "+FirstDate+"\n2. "+ SecondDate+"\n3. "+ThirdDate+"\nPlease respond with the option number.";
+                            this.nCur=State.CONTACTSERVICEAGENT;
                             break;
                             }
                     }
@@ -148,11 +160,54 @@ namespace OrderBot
                     }
                     }
                     break;
-                case State.SIZE:
-                    sMessage = "inside size";
-                    this.nCur=State.FOODPRODUCTS;
+                case State.CONTACTSERVICEAGENT:
+                StringBuilder food = new StringBuilder();
+                                foreach (String s in oOrder._foodProducts)
+                                {
+                                    food.Append(" "+s);
+                                }
+                StringBuilder quality = new StringBuilder();
+                                foreach (String s in oOrder._qualityCriteria)
+                                {
+                                    quality.Append(" "+s);
+                                }     
+                int userdateselection=0;
+                int.TryParse(sInMessage, out userdateselection);
+                if(userdateselection!=0){
+                if(userdateselection==1){
+                    oOrder.AppointmentDate=FirstDate;
+                    this.nCur=State.BOOKED;
+                }
+                else if(userdateselection==2){
+                    oOrder.AppointmentDate=SecondDate;
+                    this.nCur=State.BOOKED;
+                }
+                else if(userdateselection==3){
+                    oOrder.AppointmentDate=ThirdDate;
+                    this.nCur=State.BOOKED;
+                }
+                else{
+                     sMessage="Selected date is not available. Please select from the available options displayed below.\n"+
+                    "1. "+FirstDate+"\n2. "+ SecondDate+"\n3. "+ThirdDate+"\nPlease respond with the option number.";
                     break;
+                }
                 
+                sMessage="Your appointment with our customer service agent is successfully confirmed for "+oOrder.AppointmentDate+"\n"+
+                "Please find the order details below:\n"+
+                "Machine Type: "+oOrder.MachineType+"\n"+
+                "Products to Test: "+food+"\n"+
+                "Quality criteria: "+quality;
+                this.oOrder.Save();
+                }
+                else
+                {
+                   sMessage="Invalid Input. Please select from the available options displayed below.\n"+
+                    "1. "+FirstDate+"\n2. "+ SecondDate+"\n3. "+ThirdDate+"\nPlease respond with the option number.";
+                }
+                break;
+                case State.BOOKED:
+                sMessage="Your appointment is confirmed for "+oOrder.AppointmentDate+"\n";
+                break;
             }
             System.Diagnostics.Debug.WriteLine(sMessage);
             return sMessage;
