@@ -17,6 +17,7 @@ namespace OrderBot
         public Session(string sPhone){
             Random random=new Random();
             this.oOrder = new Order();
+            this.oOrder.AppointmentID=sPhone;
             this.oOrder.AppointmentID = random.Next().ToString();
         }
 
@@ -193,12 +194,13 @@ namespace OrderBot
                     break;
                 }
                 
+                this.oOrder.Save();
                 sMessage="Your appointment with our customer service agent is successfully confirmed for "+oOrder.AppointmentDate+"\n"+
                 "Please find the order details below:\n"+
+                "Appointment ID: "+oOrder.AppointmentID+"\n"+
                 "Machine Type: "+oOrder.MachineType+"\n"+
                 "Products to Test: "+food+"\n"+
-                "Quality criteria: "+quality;
-                this.oOrder.Save();
+                "Quality criteria: "+quality;                
                 }
                 else
                 {
